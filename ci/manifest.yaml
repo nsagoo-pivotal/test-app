@@ -1,0 +1,25 @@
+---
+resources:
+- name: code-repository
+  type: git
+  source: 
+    uri: https://github.com/nsagoo-pivotal/concourse-demo-dhs
+    branch: master
+    
+- name: cloud-foundry
+  type: cf
+  source:
+    api: {{cf-api}}
+    username: {{cf-username}}
+    password: {{cf-password}}
+    organization: {{cf-org}}
+    space: {{cf-space}}
+
+jobs:
+- name: deploy
+  plan:
+  - get: code-repository
+    trigger: true
+  - put: cloud-foundry
+    params:
+      manifest: code-repository/manifest.yaml

@@ -1,34 +1,56 @@
-# Test App - a simple Go webapp
+# A Cloud-Native App in GoLang
 
-### Pushing the app to Cloud Foundry
+This is a concourse demo showing continuous deployment of a cloud-native app to Cloud Foundry using [Concourse](http://concourse.ci/), an open-source, continuous integration tool.
 
-```
-cf push test-app
-```
+### Setup Concourse
 
-### Endpoints
-
-`/`: a simple landing page displaying the index and uptime
-`/env`: displays environment variables
-`/exit`: instructs the app to exit with status code 1
-`/port`: returns the local port the request was received on
-
-### Configure the app to listen on multiple ports
-
-By providing a customer start command, you can configure the app to listen on multiple ports. The app responds the same way to each port.
-```
-cf push test-app -c "test-app --ports=7777,8888"
-```
-
-### Pushing the app to CF as a Docker image
-
-Simple App is also packaged as a docker image at cloudfoundry/test-app
+[Setup & run Concourse](http://concourse.ci/installing.html) in a local VirtualBox VM using Vagrant 
 
 ```bash
-cf push my-test-app -o cloudfoundry/test-app
+vagrant init concourse/lite # creates ./Vagrantfile
+```
+```bash 
+vagrant up
 ```
 
-### To rebuild the dockerimage:
+Visit `192.168.100.4:8080` in your local browser to see the pipeline; download & configure Concourse [CLI](http://concourse.ci/hello-world.html)
+
+### Deploy Pipeline
+
+Target your local VirtualBox Concourse
+```bash 
+fly -t lite login -c http://192.168.100.4:8080
+```
+Download the applicaiton to your local workspace
+```bash
+git clone https://github.com/nsagoo-pivotal/concourse-demo-dhs
+```
+
+Update the credentials.yaml file found in ci directory of the source code.
+
+Create pipeline
+```bash
+fly -t lite set-pipeline -p hello-world -c ci/manifest.yaml --load-vars-from ci/credentials.yaml
+```
+
+Unpause pipeline
+```bash
+fly -t lite unpause-pipeline -p hello-world
+```
+
+Deploy Job
+```bash
+fly -t lite trigger-job --job hello-world/deploy
+```
+You can also select the "deploy" job from the browser and click on the "+" sign to start the job. 
+
+### App Endpoints
+
+`/`: a simple landing page displaying the index and uptime  
+`/env`: displays environment variables  
+`/exit`: instructs app to self-delete with status code 1  
+
+### Build via dockerimage:
 
 ```bash
 ./build.sh
