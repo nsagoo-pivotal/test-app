@@ -3,4 +3,4 @@ applications:
 - name: cloud-native-go-app
   memory: 512M
   instances: 1
-  buildpack: go_buildpack%
+  buildpack: go_buildpack
